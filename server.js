@@ -1,11 +1,12 @@
 const express = require('express');
 const multer = require('multer');
 const { PDFDocument } = require('pdf-lib');
+const path = require('path'); // <-- Add this line
 
 const app = express();
 
-// Serve static files from public directory
-app.use(express.static('public'));
+// Serve static files from public directory using an absolute path
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Configure multer for handling file uploads
 const upload = multer({
