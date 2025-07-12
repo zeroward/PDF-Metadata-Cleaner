@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Metadata Cleaner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔒 PDF Metadata Stripper</h1>
+            <p>Remove sensitive metadata from your PDFs. Nothing is stored on our servers.</p>
+        </header>
+
+        <main>
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">📄</div>
+                    <h3>Drop your PDF here or click to browse</h3>
+                    <p>Maximum file size: 10MB</p>
+                    <input type="file" id="pdfFile" accept=".pdf" required style="display: none;">
+                </div>
+                <button id="processBtn" class="btn-primary" disabled>Strip Metadata</button>
+            </div>
+
+            <div class="loading" id="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Processing your PDF...</p>
+            </div>
+
+            <div class="results" id="results" style="display: none;">
+                <div class="metadata-section">
+                    <h3>📊 Original Metadata Found</h3>
+                    <div class="metadata-grid" id="metadataGrid">
+                        <!-- Metadata will be populated here -->
+                    </div>
+                </div>
+
+                <div class="success-section">
+                    <div class="success-icon">✅</div>
+                    <h3>Metadata Successfully Removed!</h3>
+                    <div class="file-stats">
+                        <span id="fileSizeComparison"></span>
+                    </div>
+                    <button id="downloadBtn" class="btn-success">Download Clean PDF</button>
+                    <button id="processAnother" class="btn-secondary">Process Another File</button>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>🔐 Your files are processed in memory and never stored on our servers.</p>
+            <p>Open source • Privacy focused • No tracking</p>
+            <p>
+                <a href="https://me.soter.cloud" target="_blank" rel="noopener noreferrer">Personal Website</a> • 
+                <a href="https://github.com/zeroward/PDF-Metadata-Cleaner" target="_blank" rel="noopener noreferrer">GitHub Repo</a>
+            </p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
