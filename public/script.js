@@ -15,12 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let cleanedPdfData = null;
     let originalFileName = 'document.pdf';
 
-    // --- Event Listeners ---
-
-    // Handle click to browse
     uploadArea.addEventListener('click', () => pdfFileInput.click());
 
-    // Handle drag and drop
     uploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadArea.classList.add('dragover');
@@ -36,20 +32,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Handle file selection from input
     pdfFileInput.addEventListener('change', handleFileSelection);
 
-    // Handle "Strip Metadata" button click
     processBtn.addEventListener('click', processFile);
 
-    // Handle "Download" button click
     downloadBtn.addEventListener('click', downloadCleanedPdf);
 
-    // Handle "Process Another" button click
     processAnother.addEventListener('click', resetToUpload);
-
-
-    // --- Core Functions ---
 
     function handleFileSelection() {
         const file = pdfFileInput.files[0];
@@ -60,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
             resetFileInput();
             return;
         }
-        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+        if (file.size > 10 * 1024 * 1024) {
             alert('File is too large. Maximum size is 10MB.');
             resetFileInput();
             return;
@@ -78,7 +67,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const formData = new FormData();
         formData.append('pdf', file);
 
-        // Switch to loading view
         uploadSection.style.display = 'none';
         loading.style.display = 'block';
         results.style.display = 'none';
@@ -106,15 +94,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function displayResults(data) {
-        // Display metadata
         displayMetadata(data.originalMetadata);
-
-        // Display file size comparison
         const originalSizeKB = (data.originalSize / 1024).toFixed(1);
         const cleanedSizeKB = (data.cleanedSize / 1024).toFixed(1);
         fileSizeComparison.textContent = `Original: ${originalSizeKB} KB → Cleaned: ${cleanedSizeKB} KB`;
-
-        // Switch to results view
         loading.style.display = 'none';
         results.style.display = 'block';
     }
