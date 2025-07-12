@@ -1,17 +1,22 @@
 const express = require('express');
 const multer = require('multer');
 const { PDFDocument } = require('pdf-lib');
-const path = require('path');
 
 const app = express();
 
-// Serve static files
+// Serve static files from public directory
 app.use(express.static('public'));
 
-// Configure multer for memory storage
-const upload = multer({ 
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+// Configure multer for handling file uploads
+const upload = multer({
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/pdf') {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF files are allowed'));
+    }
+  }
 });
 
 app.post('/strip-metadata', upload.single('pdf'), async (req, res) => {
@@ -20,10 +25,8 @@ app.post('/strip-metadata', upload.single('pdf'), async (req, res) => {
       return res.status(400).json({ error: 'No PDF file uploaded' });
     }
 
-    // Load PDF from memory
     const pdfDoc = await PDFDocument.load(req.file.buffer);
     
-    // Extract existing metadata
     const originalMetadata = {
       title: pdfDoc.getTitle() || '',
       author: pdfDoc.getAuthor() || '',
