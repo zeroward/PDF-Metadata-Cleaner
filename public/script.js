@@ -1,27 +1,69 @@
-console.log('Minimal script.js has been loaded.');
+console.log('Enhanced script.js has been loaded.');
 
 document.addEventListener('DOMContentLoaded', function() {
+    // DOM elements
+    const modeSelection = document.getElementById('modeSelection');
+    const modeButtons = document.querySelectorAll('.mode-btn');
     const uploadSection = document.getElementById('uploadSection');
     const uploadArea = document.getElementById('uploadArea');
     const pdfFileInput = document.getElementById('pdfFile');
     const processBtn = document.getElementById('processBtn');
+    const metadataEditor = document.getElementById('metadataEditor');
+    const clearMetadataBtn = document.getElementById('clearMetadataBtn');
+    const processWithMetadataBtn = document.getElementById('processWithMetadataBtn');
     const loading = document.getElementById('loading');
     const results = document.getElementById('results');
     const metadataGrid = document.getElementById('metadataGrid');
     const downloadBtn = document.getElementById('downloadBtn');
     const processAnother = document.getElementById('processAnother');
     const fileSizeComparison = document.getElementById('fileSizeComparison');
+    const successMessage = document.getElementById('successMessage');
 
+    // Metadata form inputs
+    const titleInput = document.getElementById('title');
+    const authorInput = document.getElementById('author');
+    const subjectInput = document.getElementById('subject');
+    const keywordsInput = document.getElementById('keywords');
+    const creatorInput = document.getElementById('creator');
+    const producerInput = document.getElementById('producer');
+
+    let currentMode = 'strip';
     let cleanedPdfData = null;
     let originalFileName = 'document.pdf';
+    let originalMetadata = null;
 
+    // Mode selection
+    modeButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            modeButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentMode = btn.dataset.mode;
+            updateInterface();
+        });
+    });
+
+    function updateInterface() {
+        if (currentMode === 'strip') {
+            metadataEditor.style.display = 'none';
+            processBtn.textContent = 'Strip Metadata';
+            processBtn.onclick = processFile;
+        } else {
+            metadataEditor.style.display = 'block';
+            processBtn.textContent = 'Load Metadata';
+            processBtn.onclick = loadMetadata;
+        }
+    }
+
+    // File upload handling
     uploadArea.addEventListener('click', () => pdfFileInput.click());
 
     uploadArea.addEventListener('dragover', (e) => {
         e.preventDefault();
         uploadArea.classList.add('dragover');
     });
+    
     uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('dragover'));
+    
     uploadArea.addEventListener('drop', (e) => {
         e.preventDefault();
         uploadArea.classList.remove('dragover');
@@ -34,10 +76,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     pdfFileInput.addEventListener('change', handleFileSelection);
 
-    processBtn.addEventListener('click', processFile);
-
+    clearMetadataBtn.addEventListener('click', clearMetadataForm);
+    processWithMetadataBtn.addEventListener('click', processWithCustomMetadata);
     downloadBtn.addEventListener('click', downloadCleanedPdf);
-
     processAnother.addEventListener('click', resetToUpload);
 
     function handleFileSelection() {
@@ -58,6 +99,59 @@ document.addEventListener('DOMContentLoaded', function() {
         originalFileName = file.name;
         uploadArea.querySelector('h3').textContent = `Selected: ${file.name}`;
         processBtn.disabled = false;
+    }
+
+    async function loadMetadata() {
+        const file = pdfFileInput.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('pdf', file);
+
+        uploadSection.style.display = 'none';
+        loading.style.display = 'block';
+        results.style.display = 'none';
+
+        try {
+            const response = await fetch('/get-metadata', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            originalMetadata = data.metadata;
+            populateMetadataForm(data.metadata);
+            loading.style.display = 'none';
+            uploadSection.style.display = 'block';
+
+        } catch (error) {
+            console.error('Error loading metadata:', error);
+            alert(`An error occurred: ${error.message}`);
+            resetToUpload();
+        }
+    }
+
+    function populateMetadataForm(metadata) {
+        titleInput.value = metadata.title || '';
+        authorInput.value = metadata.author || '';
+        subjectInput.value = metadata.subject || '';
+        keywordsInput.value = Array.isArray(metadata.keywords) ? metadata.keywords.join(', ') : metadata.keywords || '';
+        creatorInput.value = metadata.creator || '';
+        producerInput.value = metadata.producer || '';
+    }
+
+    function clearMetadataForm() {
+        titleInput.value = '';
+        authorInput.value = '';
+        subjectInput.value = '';
+        keywordsInput.value = '';
+        creatorInput.value = '';
+        producerInput.value = '';
     }
 
     async function processFile() {
@@ -84,7 +178,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const data = await response.json();
             cleanedPdfData = data.cleanedPdf;
-            displayResults(data);
+            originalMetadata = data.originalMetadata;
+            displayResults(data, 'Metadata Successfully Removed!');
 
         } catch (error) {
             console.error('Error processing PDF:', error);
@@ -93,11 +188,66 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function displayResults(data) {
+    async function processWithCustomMetadata() {
+        const file = pdfFileInput.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('pdf', file);
+
+        const customMetadata = {
+            title: titleInput.value.trim() || undefined,
+            author: authorInput.value.trim() || undefined,
+            subject: subjectInput.value.trim() || undefined,
+            keywords: keywordsInput.value.trim() ? keywordsInput.value.split(',').map(k => k.trim()) : undefined,
+            creator: creatorInput.value.trim() || undefined,
+            producer: producerInput.value.trim() || undefined
+        };
+
+        // Remove undefined values
+        Object.keys(customMetadata).forEach(key => {
+            if (customMetadata[key] === undefined) {
+                delete customMetadata[key];
+            }
+        });
+
+        // Add metadata as JSON string to form data
+        formData.append('metadata', JSON.stringify(customMetadata));
+
+        uploadSection.style.display = 'none';
+        metadataEditor.style.display = 'none';
+        loading.style.display = 'block';
+        results.style.display = 'none';
+
+        try {
+            const response = await fetch('/process-with-metadata', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            cleanedPdfData = data.processedPdf;
+            originalMetadata = data.originalMetadata;
+            displayResults(data, 'PDF Processed with Custom Metadata!');
+
+        } catch (error) {
+            console.error('Error processing PDF:', error);
+            alert(`An error occurred: ${error.message}`);
+            resetToUpload();
+        }
+    }
+
+    function displayResults(data, message) {
         displayMetadata(data.originalMetadata);
         const originalSizeKB = (data.originalSize / 1024).toFixed(1);
-        const cleanedSizeKB = (data.cleanedSize / 1024).toFixed(1);
-        fileSizeComparison.textContent = `Original: ${originalSizeKB} KB → Cleaned: ${cleanedSizeKB} KB`;
+        const processedSizeKB = ((data.processedSize || data.cleanedSize) / 1024).toFixed(1);
+        fileSizeComparison.textContent = `Original: ${originalSizeKB} KB → Processed: ${processedSizeKB} KB`;
+        successMessage.textContent = message;
         loading.style.display = 'none';
         results.style.display = 'block';
     }
@@ -140,7 +290,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `cleaned-${originalFileName}`;
+        a.download = `processed-${originalFileName}`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -149,17 +299,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function resetFileInput() {
         pdfFileInput.value = '';
-        uploadArea.querySelector('h3').textContent = 'Drag & drop your PDF file here or click to browse.';
+        uploadArea.querySelector('h3').textContent = 'Drop your PDF here or click to browse';
         processBtn.disabled = true;
     }
 
     function resetToUpload() {
         uploadSection.style.display = 'block';
+        metadataEditor.style.display = 'none';
         loading.style.display = 'none';
         results.style.display = 'none';
         resetFileInput();
         metadataGrid.innerHTML = '';
         fileSizeComparison.textContent = '';
         cleanedPdfData = null;
+        originalMetadata = null;
+        clearMetadataForm();
+        updateInterface();
     }
+
+    // Initialize interface
+    updateInterface();
 });

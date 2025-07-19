@@ -14,6 +14,14 @@
         </header>
 
         <main>
+            <div class="mode-selection" id="modeSelection">
+                <h3>Choose Processing Mode</h3>
+                <div class="mode-buttons">
+                    <button class="mode-btn active" data-mode="strip">🔇 Strip All Metadata</button>
+                    <button class="mode-btn" data-mode="edit">✏️ Edit Metadata</button>
+                </div>
+            </div>
+
             <div class="upload-section" id="uploadSection">
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-icon">📄</div>
@@ -21,7 +29,41 @@
                     <p>Maximum file size: 10MB</p>
                     <input type="file" id="pdfFile" accept=".pdf" required style="display: none;">
                 </div>
-                <button id="processBtn" class="btn-primary" disabled>Strip Metadata</button>
+                <button id="processBtn" class="btn-primary" disabled>Process PDF</button>
+            </div>
+
+            <div class="metadata-editor" id="metadataEditor" style="display: none;">
+                <h3>📝 Edit Metadata</h3>
+                <div class="metadata-form">
+                    <div class="form-group">
+                        <label for="title">Title:</label>
+                        <input type="text" id="title" placeholder="Document title">
+                    </div>
+                    <div class="form-group">
+                        <label for="author">Author:</label>
+                        <input type="text" id="author" placeholder="Document author">
+                    </div>
+                    <div class="form-group">
+                        <label for="subject">Subject:</label>
+                        <input type="text" id="subject" placeholder="Document subject">
+                    </div>
+                    <div class="form-group">
+                        <label for="keywords">Keywords:</label>
+                        <input type="text" id="keywords" placeholder="Comma-separated keywords">
+                    </div>
+                    <div class="form-group">
+                        <label for="creator">Creator:</label>
+                        <input type="text" id="creator" placeholder="Software that created the document">
+                    </div>
+                    <div class="form-group">
+                        <label for="producer">Producer:</label>
+                        <input type="text" id="producer" placeholder="Software that produced the PDF">
+                    </div>
+                </div>
+                <div class="metadata-actions">
+                    <button id="clearMetadataBtn" class="btn-secondary">Clear All</button>
+                    <button id="processWithMetadataBtn" class="btn-primary">Process with Custom Metadata</button>
+                </div>
             </div>
 
             <div class="loading" id="loading" style="display: none;">
@@ -39,11 +81,11 @@
 
                 <div class="success-section">
                     <div class="success-icon">✅</div>
-                    <h3>Metadata Successfully Removed!</h3>
+                    <h3 id="successMessage">Metadata Successfully Removed!</h3>
                     <div class="file-stats">
                         <span id="fileSizeComparison"></span>
                     </div>
-                    <button id="downloadBtn" class="btn-success">Download Clean PDF</button>
+                    <button id="downloadBtn" class="btn-success">Download Processed PDF</button>
                     <button id="processAnother" class="btn-secondary">Process Another File</button>
                 </div>
             </div>
