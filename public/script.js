@@ -4,6 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // DOM elements
     const modeSelection = document.getElementById('modeSelection');
     const modeButtons = document.querySelectorAll('.mode-btn');
+    const processingButtons = document.querySelectorAll('.processing-btn');
+    const processingInfo = document.getElementById('processingInfo');
     const uploadSection = document.getElementById('uploadSection');
     const uploadArea = document.getElementById('uploadArea');
     const pdfFileInput = document.getElementById('pdfFile');
@@ -28,6 +30,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const producerInput = document.getElementById('producer');
 
     let currentMode = 'strip';
+    let currentProcessing = 'server';
     let cleanedPdfData = null;
     let originalFileName = 'document.pdf';
     let originalMetadata = null;
@@ -42,6 +45,36 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    // Processing location selection
+    processingButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            processingButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentProcessing = btn.dataset.processing;
+            updateProcessingInfo();
+        });
+    });
+
+    function updateProcessingInfo() {
+        const file = pdfFileInput.files[0];
+        if (file) {
+            const fileSizeMB = file.size / (1024 * 1024);
+            if (fileSizeMB > 10 && currentProcessing === 'client') {
+                processingInfo.innerHTML = '<p>⚠️ Large file detected. Client processing may be slow or fail. Consider using server processing for files over 10MB.</p>';
+            } else if (currentProcessing === 'client') {
+                processingInfo.innerHTML = '<p>🔒 Your file will be processed locally in your browser. No data will be sent to our servers.</p>';
+            } else {
+                processingInfo.innerHTML = '<p>🖥️ File will be processed on our secure server. Recommended for large files and better reliability.</p>';
+            }
+        } else {
+            if (currentProcessing === 'client') {
+                processingInfo.innerHTML = '<p>🔒 Files will be processed locally in your browser for maximum privacy.</p>';
+            } else {
+                processingInfo.innerHTML = '<p>🖥️ Files will be processed on our secure server for better reliability.</p>';
+            }
+        }
+    }
+
     function updateInterface() {
         if (currentMode === 'strip') {
             metadataEditor.style.display = 'none';
@@ -52,6 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
             processBtn.textContent = 'Load Metadata';
             processBtn.onclick = loadMetadata;
         }
+        updateProcessingInfo();
     }
 
     // File upload handling
@@ -90,8 +124,8 @@ document.addEventListener('DOMContentLoaded', function() {
             resetFileInput();
             return;
         }
-        if (file.size > 10 * 1024 * 1024) {
-            alert('File is too large. Maximum size is 10MB.');
+        if (file.size > 50 * 1024 * 1024) {
+            alert('File is too large. Maximum size is 50MB.');
             resetFileInput();
             return;
         }
@@ -99,12 +133,54 @@ document.addEventListener('DOMContentLoaded', function() {
         originalFileName = file.name;
         uploadArea.querySelector('h3').textContent = `Selected: ${file.name}`;
         processBtn.disabled = false;
+        updateProcessingInfo();
     }
 
     async function loadMetadata() {
         const file = pdfFileInput.files[0];
         if (!file) return;
 
+        if (currentProcessing === 'client') {
+            await loadMetadataClient(file);
+        } else {
+            await loadMetadataServer(file);
+        }
+    }
+
+    async function loadMetadataClient(file) {
+        uploadSection.style.display = 'none';
+        loading.style.display = 'block';
+        results.style.display = 'none';
+
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            
+            const metadata = {
+                title: pdfDoc.getTitle() || '',
+                author: pdfDoc.getAuthor() || '',
+                subject: pdfDoc.getSubject() || '',
+                keywords: pdfDoc.getKeywords() || [],
+                producer: pdfDoc.getProducer() || '',
+                creator: pdfDoc.getCreator() || '',
+                creationDate: pdfDoc.getCreationDate()?.toISOString() || '',
+                modificationDate: pdfDoc.getModificationDate()?.toISOString() || '',
+                pageCount: pdfDoc.getPageCount()
+            };
+
+            originalMetadata = metadata;
+            populateMetadataForm(metadata);
+            loading.style.display = 'none';
+            uploadSection.style.display = 'block';
+
+        } catch (error) {
+            console.error('Error loading metadata:', error);
+            alert(`An error occurred: ${error.message}`);
+            resetToUpload();
+        }
+    }
+
+    async function loadMetadataServer(file) {
         const formData = new FormData();
         formData.append('pdf', file);
 
@@ -158,6 +234,56 @@ document.addEventListener('DOMContentLoaded', function() {
         const file = pdfFileInput.files[0];
         if (!file) return;
 
+        if (currentProcessing === 'client') {
+            await processFileClient(file);
+        } else {
+            await processFileServer(file);
+        }
+    }
+
+    async function processFileClient(file) {
+        uploadSection.style.display = 'none';
+        loading.style.display = 'block';
+        results.style.display = 'none';
+
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            
+            const originalMetadata = {
+                title: pdfDoc.getTitle() || '',
+                author: pdfDoc.getAuthor() || '',
+                subject: pdfDoc.getSubject() || '',
+                keywords: pdfDoc.getKeywords() || [],
+                producer: pdfDoc.getProducer() || '',
+                creator: pdfDoc.getCreator() || '',
+                creationDate: pdfDoc.getCreationDate()?.toISOString() || '',
+                modificationDate: pdfDoc.getModificationDate()?.toISOString() || '',
+                pageCount: pdfDoc.getPageCount()
+            };
+            
+            const newPdfDoc = await PDFLib.PDFDocument.create();
+            const copiedPages = await newPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+            copiedPages.forEach(page => newPdfDoc.addPage(page));
+
+            const pdfBytes = await newPdfDoc.save();
+            cleanedPdfData = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
+            
+            displayResults({
+                originalMetadata,
+                cleanedPdf: cleanedPdfData,
+                originalSize: file.size,
+                cleanedSize: pdfBytes.length
+            }, 'Metadata Successfully Removed!');
+
+        } catch (error) {
+            console.error('Error processing PDF:', error);
+            alert(`An error occurred: ${error.message}`);
+            resetToUpload();
+        }
+    }
+
+    async function processFileServer(file) {
         const formData = new FormData();
         formData.append('pdf', file);
 
@@ -192,6 +318,82 @@ document.addEventListener('DOMContentLoaded', function() {
         const file = pdfFileInput.files[0];
         if (!file) return;
 
+        if (currentProcessing === 'client') {
+            await processWithCustomMetadataClient(file);
+        } else {
+            await processWithCustomMetadataServer(file);
+        }
+    }
+
+    async function processWithCustomMetadataClient(file) {
+        const customMetadata = {
+            title: titleInput.value.trim() || undefined,
+            author: authorInput.value.trim() || undefined,
+            subject: subjectInput.value.trim() || undefined,
+            keywords: keywordsInput.value.trim() ? keywordsInput.value.split(',').map(k => k.trim()) : undefined,
+            creator: creatorInput.value.trim() || undefined,
+            producer: producerInput.value.trim() || undefined
+        };
+
+        // Remove undefined values
+        Object.keys(customMetadata).forEach(key => {
+            if (customMetadata[key] === undefined) {
+                delete customMetadata[key];
+            }
+        });
+
+        uploadSection.style.display = 'none';
+        metadataEditor.style.display = 'none';
+        loading.style.display = 'block';
+        results.style.display = 'none';
+
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer);
+            
+            const originalMetadata = {
+                title: pdfDoc.getTitle() || '',
+                author: pdfDoc.getAuthor() || '',
+                subject: pdfDoc.getSubject() || '',
+                keywords: pdfDoc.getKeywords() || [],
+                producer: pdfDoc.getProducer() || '',
+                creator: pdfDoc.getCreator() || '',
+                creationDate: pdfDoc.getCreationDate()?.toISOString() || '',
+                modificationDate: pdfDoc.getModificationDate()?.toISOString() || '',
+                pageCount: pdfDoc.getPageCount()
+            };
+            
+            const newPdfDoc = await PDFLib.PDFDocument.create();
+            const copiedPages = await newPdfDoc.copyPages(pdfDoc, pdfDoc.getPageIndices());
+            copiedPages.forEach(page => newPdfDoc.addPage(page));
+
+            // Apply custom metadata if provided
+            if (customMetadata.title !== undefined) newPdfDoc.setTitle(customMetadata.title);
+            if (customMetadata.author !== undefined) newPdfDoc.setAuthor(customMetadata.author);
+            if (customMetadata.subject !== undefined) newPdfDoc.setSubject(customMetadata.subject);
+            if (customMetadata.keywords !== undefined) newPdfDoc.setKeywords(customMetadata.keywords);
+            if (customMetadata.creator !== undefined) newPdfDoc.setCreator(customMetadata.creator);
+            if (customMetadata.producer !== undefined) newPdfDoc.setProducer(customMetadata.producer);
+
+            const pdfBytes = await newPdfDoc.save();
+            cleanedPdfData = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
+            
+            displayResults({
+                originalMetadata,
+                customMetadata,
+                processedPdf: cleanedPdfData,
+                originalSize: file.size,
+                processedSize: pdfBytes.length
+            }, 'PDF Processed with Custom Metadata!');
+
+        } catch (error) {
+            console.error('Error processing PDF:', error);
+            alert(`An error occurred: ${error.message}`);
+            resetToUpload();
+        }
+    }
+
+    async function processWithCustomMetadataServer(file) {
         const formData = new FormData();
         formData.append('pdf', file);
 

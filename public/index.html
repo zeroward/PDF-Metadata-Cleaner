@@ -20,6 +20,25 @@
                     <button class="mode-btn active" data-mode="strip">🔇 Strip All Metadata</button>
                     <button class="mode-btn" data-mode="edit">✏️ Edit Metadata</button>
                 </div>
+                
+                <div class="processing-options">
+                    <h4>Processing Location</h4>
+                    <div class="processing-buttons">
+                        <button class="processing-btn active" data-processing="server">
+                            <span class="icon">🖥️</span>
+                            <span class="label">Server Processing</span>
+                            <span class="description">Reliable, handles large files</span>
+                        </button>
+                        <button class="processing-btn" data-processing="client">
+                            <span class="icon">🔒</span>
+                            <span class="label">Client Processing</span>
+                            <span class="description">Maximum privacy, files stay local</span>
+                        </button>
+                    </div>
+                    <div class="processing-info" id="processingInfo">
+                        <p>Server processing is recommended for files larger than 10MB or for better reliability.</p>
+                    </div>
+                </div>
             </div>
 
             <div class="upload-section" id="uploadSection">
@@ -101,6 +120,7 @@
         </footer>
     </div>
 
+    <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

@@ -57,6 +57,7 @@ header p {
     gap: 1rem;
     justify-content: center;
     flex-wrap: wrap;
+    margin-bottom: 2rem;
 }
 
 .mode-btn {
@@ -85,6 +86,91 @@ header p {
     background: linear-gradient(135deg, #3498db, #2980b9);
     color: white;
     box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.processing-options {
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(44, 62, 80, 0.1);
+}
+
+.processing-options h4 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.processing-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.processing-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1.5rem;
+    border: 2px solid #ecf0f1;
+    border-radius: 12px;
+    background: white;
+    color: #2c3e50;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 180px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.processing-btn:hover {
+    border-color: #3498db;
+    background: rgba(52, 152, 219, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.2);
+}
+
+.processing-btn.active {
+    border-color: #3498db;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+
+.processing-btn .icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.processing-btn .label {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    display: block;
+}
+
+.processing-btn .description {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    font-weight: 400;
+}
+
+.processing-info {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.processing-info p {
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin: 0;
+    padding: 0.75rem;
+    background: rgba(52, 152, 219, 0.1);
+    border-radius: 8px;
+    border: 1px solid rgba(52, 152, 219, 0.2);
 }
 
 .upload-section {
@@ -401,5 +487,27 @@ footer a:hover {
     
     .mode-btn {
         min-width: 250px;
+    }
+    
+    .processing-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .processing-btn {
+        min-width: 280px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .processing-btn .icon {
+        font-size: 1.5rem;
+    }
+    
+    .processing-btn .label {
+        font-size: 0.85rem;
+    }
+    
+    .processing-btn .description {
+        font-size: 0.75rem;
     }
 }
