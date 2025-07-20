@@ -116,8 +116,6 @@ PDF-Metadata-Cleaner/
 │   ├── index.html        # Main HTML file
 │   ├── styles.css        # CSS styles
 │   └── script.js         # Client-side JavaScript
-├── USER_GUIDE.md         # User documentation
-├── DEPLOYMENT.md         # Deployment guide
 └── README.md            # This file
 ```
 
