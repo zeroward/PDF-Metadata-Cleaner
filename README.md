@@ -116,8 +116,6 @@ PDF-Metadata-Cleaner/
 │   ├── index.html        # Main HTML file
 │   ├── styles.css        # CSS styles
 │   └── script.js         # Client-side JavaScript
-├── USER_GUIDE.md         # User documentation
-├── DEPLOYMENT.md         # Deployment guide
 └── README.md            # This file
 ```
 
@@ -136,8 +134,6 @@ The application is designed to be easily deployed to various platforms:
 - **Vercel**: Serverless deployment
 - **Railway**: Modern deployment platform
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
-
 ## Contributing
 
 1. Fork the repository
@@ -153,7 +149,6 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 ## Support
 
 For issues, questions, or feedback:
-- Check the [User Guide](USER_GUIDE.md)
 - Open an issue on GitHub
 - Ensure you're using a supported browser
 
