@@ -13,99 +13,131 @@
             <p>Remove sensitive metadata from your PDFs. Nothing is stored on our servers.</p>
         </header>
 
-        <main>
-            <div class="mode-selection" id="modeSelection">
-                <h3>Choose Processing Mode</h3>
-                <div class="mode-buttons">
-                    <button class="mode-btn active" data-mode="strip">🔇 Strip All Metadata</button>
-                    <button class="mode-btn" data-mode="edit">✏️ Edit Metadata</button>
-                </div>
-                
-                <div class="processing-options">
-                    <h4>Processing Location</h4>
-                    <div class="processing-buttons">
-                        <button class="processing-btn active" data-processing="server">
-                            <span class="icon">🖥️</span>
-                            <span class="label">Server Processing</span>
-                            <span class="description">Reliable, handles large files</span>
-                        </button>
-                        <button class="processing-btn" data-processing="client">
-                            <span class="icon">🔒</span>
-                            <span class="label">Client Processing</span>
-                            <span class="description">Maximum privacy, files stay local</span>
-                        </button>
+        <main class="main-container">
+            <div class="controls-panel">
+                <div class="mode-selection" id="modeSelection">
+                    <div class="mode-buttons">
+                        
+                        <button class="mode-btn active" data-mode="strip">🔇 Strip All</button>
+                        <button class="mode-btn" data-mode="edit">✏️ Edit</button>
                     </div>
-                    <div class="processing-info" id="processingInfo">
-                        <p>Server processing is recommended for files larger than 10MB or for better reliability.</p>
+                    
+                    <div class="processing-options">
+                        <div class="processing-buttons">
+                            <button class="processing-btn active" data-processing="server" title="Server Processing - Reliable, handles large files">
+                                <span class="icon">🖥️</span>
+                                <span class="label">Server</span>
+                            </button>
+                            <button class="processing-btn" data-processing="client" title="Client Processing - Maximum privacy, files stay local">
+                                <span class="icon">🔒</span>
+                                <span class="label">Client</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
+
+                <div class="upload-section" id="uploadSection">
+                    <div class="upload-area" id="uploadArea">
+                        <div class="upload-icon">📄</div>
+                        <h3>Drop PDF here or click to browse</h3>
+                        <p>Max 50MB</p>
+                        <input type="file" id="pdfFile" accept=".pdf" required style="display: none;">
+                    </div>
+                    <button id="processBtn" class="btn-primary" disabled>Process PDF</button>
+                </div>
+
             </div>
 
-            <div class="upload-section" id="uploadSection">
-                <div class="upload-area" id="uploadArea">
-                    <div class="upload-icon">📄</div>
-                    <h3>Drop your PDF here or click to browse</h3>
-                    <p>Maximum file size: 10MB</p>
-                    <input type="file" id="pdfFile" accept=".pdf" required style="display: none;">
-                </div>
-                <button id="processBtn" class="btn-primary" disabled>Process PDF</button>
-            </div>
-
-            <div class="metadata-editor" id="metadataEditor" style="display: none;">
-                <h3>📝 Edit Metadata</h3>
-                <div class="metadata-form">
-                    <div class="form-group">
-                        <label for="title">Title:</label>
-                        <input type="text" id="title" placeholder="Document title">
-                    </div>
-                    <div class="form-group">
-                        <label for="author">Author:</label>
-                        <input type="text" id="author" placeholder="Document author">
-                    </div>
-                    <div class="form-group">
-                        <label for="subject">Subject:</label>
-                        <input type="text" id="subject" placeholder="Document subject">
-                    </div>
-                    <div class="form-group">
-                        <label for="keywords">Keywords:</label>
-                        <input type="text" id="keywords" placeholder="Comma-separated keywords">
-                    </div>
-                    <div class="form-group">
-                        <label for="creator">Creator:</label>
-                        <input type="text" id="creator" placeholder="Software that created the document">
-                    </div>
-                    <div class="form-group">
-                        <label for="producer">Producer:</label>
-                        <input type="text" id="producer" placeholder="Software that produced the PDF">
-                    </div>
-                </div>
-                <div class="metadata-actions">
-                    <button id="clearMetadataBtn" class="btn-secondary">Clear All</button>
-                    <button id="processWithMetadataBtn" class="btn-primary">Process with Custom Metadata</button>
-                </div>
-            </div>
-
-            <div class="loading" id="loading" style="display: none;">
-                <div class="spinner"></div>
-                <p>Processing your PDF...</p>
-            </div>
-
-            <div class="results" id="results" style="display: none;">
-                <div class="metadata-section">
-                    <h3>📊 Original Metadata Found</h3>
-                    <div class="metadata-grid" id="metadataGrid">
-                        <!-- Metadata will be populated here -->
+            <div class="results-panel">
+                <div class="welcome-section" id="welcomeSection">
+                    <div class="welcome-content">
+                        <div class="welcome-icon">📄</div>
+                        <h3>PDF Metadata Cleaner</h3>
+                        <p style="text-align: center;">Upload a PDF file to get started. Choose your processing mode and location, then process your document to remove or edit metadata.</p>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <span class="feature-icon">🔇</span>
+                                <span class="feature-text">Strip All Metadata</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">✏️</span>
+                                <span class="feature-text">Edit Metadata</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🖥️</span>
+                                <span class="feature-text">Server Processing</span>
+                            </div>
+                            <div class="feature-item">
+                                <span class="feature-icon">🔒</span>
+                                <span class="feature-text">Client Processing</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="success-section">
-                    <div class="success-icon">✅</div>
-                    <h3 id="successMessage">Metadata Successfully Removed!</h3>
-                    <div class="file-stats">
-                        <span id="fileSizeComparison"></span>
+                <div class="metadata-editor" id="metadataEditor" style="display: none;">
+                    <div class="metadata-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="title">Title:</label>
+                                <input type="text" id="title" placeholder="Document title">
+                            </div>
+                            <div class="form-group">
+                                <label for="author">Author:</label>
+                                <input type="text" id="author" placeholder="Document author">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="subject">Subject:</label>
+                                <input type="text" id="subject" placeholder="Document subject">
+                            </div>
+                            <div class="form-group">
+                                <label for="keywords">Keywords:</label>
+                                <input type="text" id="keywords" placeholder="Comma-separated keywords">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="creator">Creator:</label>
+                                <input type="text" id="creator" placeholder="Software that created the document">
+                            </div>
+                            <div class="form-group">
+                                <label for="producer">Producer:</label>
+                                <input type="text" id="producer" placeholder="Software that produced the PDF">
+                            </div>
+                        </div>
                     </div>
-                    <button id="downloadBtn" class="btn-success">Download Processed PDF</button>
-                    <button id="processAnother" class="btn-secondary">Process Another File</button>
+                    <div class="metadata-actions">
+                        <button id="clearMetadataBtn" class="btn-secondary">Clear All</button>
+                        <button id="processWithMetadataBtn" class="btn-primary">Process with Custom Metadata</button>
+                    </div>
+                </div>
+
+                <div class="loading" id="loading" style="display: none;">
+                    <div class="spinner"></div>
+                    <p>Processing your PDF...</p>
+                </div>
+
+                <div class="results" id="results" style="display: none;">
+                    <div class="metadata-section">
+                        <h3>📊 Original Metadata Found</h3>
+                        <div class="metadata-grid" id="metadataGrid">
+                            <!-- Metadata will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="success-section">
+                        <div class="success-icon">✅</div>
+                        <h3 id="successMessage">Metadata Successfully Removed!</h3>
+                        <div class="file-stats">
+                            <span id="fileSizeComparison"></span>
+                        </div>
+                        <div class="action-buttons">
+                            <button id="downloadBtn" class="btn-success">Download Processed PDF</button>
+                            <button id="processAnother" class="btn-secondary">Process Another File</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -113,6 +145,9 @@
         <footer>
             <p>🔐 Your files are processed in memory and never stored on our servers.</p>
             <p>Open source • Privacy focused • No tracking</p>
+            <div class="support-section">
+                <script type="text/javascript" src="https://cdnjs.buymeacoffee.com/1.0.0/button.prod.min.js" data-name="bmc-button" data-slug="zerosoter" data-color="#FFDD00" data-emoji=""  data-font="Inter" data-text="Buy me a beer" data-outline-color="#000000" data-font-color="#000000" data-coffee-color="#ffffff" ></script>
+            </div>
             <p>
                 <a href="https://me.soter.cloud" target="_blank" rel="noopener noreferrer">Personal Website</a> • 
                 <a href="https://github.com/zeroward/PDF-Metadata-Cleaner" target="_blank" rel="noopener noreferrer">GitHub Repo</a>

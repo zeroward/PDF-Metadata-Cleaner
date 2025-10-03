@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const metadataEditor = document.getElementById('metadataEditor');
     const clearMetadataBtn = document.getElementById('clearMetadataBtn');
     const processWithMetadataBtn = document.getElementById('processWithMetadataBtn');
+    const welcomeSection = document.getElementById('welcomeSection');
     const loading = document.getElementById('loading');
     const results = document.getElementById('results');
     const metadataGrid = document.getElementById('metadataGrid');
@@ -56,6 +57,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function updateProcessingInfo() {
+        // Check if processingInfo element exists
+        if (!processingInfo) return;
+        
         const file = pdfFileInput.files[0];
         if (file) {
             const fileSizeMB = file.size / (1024 * 1024);
@@ -78,10 +82,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateInterface() {
         if (currentMode === 'strip') {
             metadataEditor.style.display = 'none';
+            welcomeSection.style.display = 'flex';
             processBtn.textContent = 'Strip Metadata';
             processBtn.onclick = processFile;
         } else {
-            metadataEditor.style.display = 'block';
+            metadataEditor.style.display = 'flex';
+            welcomeSection.style.display = 'none';
             processBtn.textContent = 'Load Metadata';
             processBtn.onclick = loadMetadata;
         }
@@ -149,6 +155,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function loadMetadataClient(file) {
         uploadSection.style.display = 'none';
+        welcomeSection.style.display = 'none';
         loading.style.display = 'block';
         results.style.display = 'none';
 
@@ -171,7 +178,9 @@ document.addEventListener('DOMContentLoaded', function() {
             originalMetadata = metadata;
             populateMetadataForm(metadata);
             loading.style.display = 'none';
+            welcomeSection.style.display = 'none';
             uploadSection.style.display = 'block';
+            // Keep metadata editor visible in the right panel
 
         } catch (error) {
             console.error('Error loading metadata:', error);
@@ -185,6 +194,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('pdf', file);
 
         uploadSection.style.display = 'none';
+        welcomeSection.style.display = 'none';
         loading.style.display = 'block';
         results.style.display = 'none';
 
@@ -203,7 +213,9 @@ document.addEventListener('DOMContentLoaded', function() {
             originalMetadata = data.metadata;
             populateMetadataForm(data.metadata);
             loading.style.display = 'none';
+            welcomeSection.style.display = 'none';
             uploadSection.style.display = 'block';
+            // Keep metadata editor visible in the right panel
 
         } catch (error) {
             console.error('Error loading metadata:', error);
@@ -243,6 +255,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function processFileClient(file) {
         uploadSection.style.display = 'none';
+        welcomeSection.style.display = 'none';
         loading.style.display = 'block';
         results.style.display = 'none';
 
@@ -288,6 +301,7 @@ document.addEventListener('DOMContentLoaded', function() {
         formData.append('pdf', file);
 
         uploadSection.style.display = 'none';
+        welcomeSection.style.display = 'none';
         loading.style.display = 'block';
         results.style.display = 'none';
 
@@ -344,6 +358,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         uploadSection.style.display = 'none';
         metadataEditor.style.display = 'none';
+        welcomeSection.style.display = 'none';
         loading.style.display = 'block';
         results.style.display = 'none';
 
@@ -418,6 +433,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         uploadSection.style.display = 'none';
         metadataEditor.style.display = 'none';
+        welcomeSection.style.display = 'none';
         loading.style.display = 'block';
         results.style.display = 'none';
 
@@ -507,7 +523,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function resetToUpload() {
         uploadSection.style.display = 'block';
-        metadataEditor.style.display = 'none';
         loading.style.display = 'none';
         results.style.display = 'none';
         resetFileInput();
@@ -516,7 +531,7 @@ document.addEventListener('DOMContentLoaded', function() {
         cleanedPdfData = null;
         originalMetadata = null;
         clearMetadataForm();
-        updateInterface();
+        updateInterface(); // This will handle showing welcome or metadata editor based on mode
     }
 
     // Initialize interface
